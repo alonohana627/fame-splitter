@@ -1,6 +1,7 @@
 import cv2
 import os
 import shutil
+import time
 from pathlib import Path
 import sys
 
@@ -31,21 +32,25 @@ print("=====================")
 
 
 def folder_iterator(folder: str):
-    all_files = os.listdir(f'{folder}')
-    extensions = ['mp4', 'avi']  # TODO: add more formats
-    video_files = [f for f in all_files if any(f.endswith(ext) for ext in extensions)]
+    while True:
+        all_files = os.listdir(f'{folder}')
+        extensions = ['mp4', 'avi']  # TODO: add more formats
+        video_files = [f for f in all_files if any(f.endswith(ext) for ext in extensions)]
 
-    print(f"There are {len(video_files)} videos to process\n")
+        print(f"There are {len(video_files)} videos to process\n")
 
-    for index, file in enumerate(video_files):
-        print(f"{index + 1}/{len(video_files)}: Currently processing {file}...")
-        video_path = f'{folder}/{file}'
-        result = video_iterator(video_path, file)
+        for index, file in enumerate(video_files):
+            print(f"{index + 1}/{len(video_files)}: Currently processing {file}...")
+            video_path = f'{folder}/{file}'
+            result = video_iterator(video_path, file)
 
-        if result is True:
-            print(f"{index + 1}/{len(video_files)}: DONE!\n")
-        else:
-            print(f"{index + 1}/{len(video_files)}: {file} is not done. Moved to unfinished videos folder")
+            if result is True:
+                print(f"{index + 1}/{len(video_files)}: DONE!\n")
+            else:
+                print(f"{index + 1}/{len(video_files)}: {file} is not done. Moved to unfinished videos folder")
+
+        print("Waiting 120 seconds...\n")
+        time.sleep(120)
 
 
 def video_iterator(video_path: str, file_name: str):
@@ -69,7 +74,8 @@ def video_iterator(video_path: str, file_name: str):
 
     # Release video capture
     video.release()
-    shutil.move(video_path, finished_videos)
+    shutil.copy2(video_path, finished_videos)
+    os.remove(video_path)
     return True
 
 
