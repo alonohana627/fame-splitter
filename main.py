@@ -1,18 +1,49 @@
 import cv2
 import os
+import shutil
+from pathlib import Path
+import sys
+
+videos_path = ""
+
+if len(sys.argv) == 1:
+    videos_path = "./videos"
+else:
+    videos_path = sys.argv[1]
+
+# if videos_path == None:
+#     print("Videos Path ENV does not exist")
+#     exit(1)
+
+if videos_path is None:
+    videos_path = "./videos"
+
+finished_videos = os.path.join(videos_path, "finished_videos")
+screenshot_path = os.path.join(videos_path, "screenshots")
+
+Path(finished_videos).mkdir(exist_ok=True)
+Path(screenshot_path).mkdir(exist_ok=True)
+
+print("Video Frame Splitter")
+print("=====================")
 
 
 def folder_iterator(folder: str):
     all_files = os.listdir(f'{folder}')
-    for file in all_files:
-        if file.endswith('.mp4'):
-            video_path = f'{folder}/{file}'
-            video_iterator(video_path)
+    extensions = ['mp4', 'avi']  # TODO: add more formats
+    video_files = [f for f in all_files if any(f.endswith(ext) for ext in extensions)]
+
+    print(f"There are {len(video_files)} videos to process\n")
+
+    for index, file in enumerate(video_files):
+        print(f"{index + 1}/{len(video_files)}: Currently processing {file}...")
+        video_path = f'{folder}/{file}'
+        video_iterator(video_path, file)
+
+        print(f"{index + 1}/{len(video_files)}: DONE!\n")
 
 
-def video_iterator(video_path: str):
-    screenshot_path = f'{video_path}_screenshot'
-    os.mkdir(f'{screenshot_path}')
+def video_iterator(video_path: str, file_name: str):
     video = cv2.VideoCapture(video_path)
 
     fps = int(video.get(cv2.CAP_PROP_FPS))
@@ -22,10 +53,11 @@ def video_iterator(video_path: str):
         video.set(cv2.CAP_PROP_POS_FRAMES, i)
         ret, frame = video.read()
         if ret:
-            cv2.imwrite(f'{screenshot_path}/frame_{i}.jpg', frame)
+            cv2.imwrite(f'{screenshot_path}/{file_name}_frame_{i}.jpg', frame)
 
     # Release video capture
     video.release()
+    shutil.move(video_path, finished_videos)
 
 
-folder_iterator('./videos')
+folder_iterator(videos_path)
