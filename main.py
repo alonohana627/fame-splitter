@@ -58,6 +58,8 @@ def video_iterator(video_path: str, file_name: str):
 
     fps = int(video.get(cv2.CAP_PROP_FPS))
     total_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
+    if fps == 0 or total_frames == 0:
+        return False
 
     for i in range(0, total_frames, fps):
         video.set(cv2.CAP_PROP_POS_FRAMES, i)
