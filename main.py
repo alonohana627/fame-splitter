@@ -34,7 +34,7 @@ print("=====================")
 def folder_iterator(folder: str):
     while True:
         all_files = os.listdir(f'{folder}')
-        extensions = ['mp4', 'avi']  # TODO: add more formats
+        extensions = ['mp4', 'avi', 'mov', 'MP4']  # TODO: add more formats
         video_files = [f for f in all_files if any(f.endswith(ext) for ext in extensions)]
 
         print(f"There are {len(video_files)} videos to process\n")
@@ -59,6 +59,8 @@ def video_iterator(video_path: str, file_name: str):
     fps = int(video.get(cv2.CAP_PROP_FPS))
     total_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
     if fps == 0 or total_frames == 0:
+        video.release()
+        shutil.move(video_path, unfinished_videos)
         return False
 
     for i in range(0, total_frames, fps):
